@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef">
+  <process id="Dispatch" name="DispatchProcess" isExecutable="true">
+    <documentation>接警调派</documentation>
+    <startEvent id="start" name="开始"/>
+    <sequenceFlow id="startFlow" sourceRef="start" targetRef="assignTask"/>
+    <exclusiveGateway id="judgeAssign" name="是否分配成功"/>
+    <sequenceFlow id="assignFlow" sourceRef="assignTask" targetRef="judgeAssign"/>
+    <serviceTask id="assignTask" name="分配调派员" flowable:exclusive="true" flowable:delegateExpression="${assignTask}">
+      <extensionElements>
+        <flowable:field name="incidentCode"/>
+        <flowable:field name="autoAssign"/>
+      </extensionElements>
+    </serviceTask>
+    <userTask id="dispatcher" name="调度员">
+      <extensionElements>
+        <flowable:formProperty id="incidentCode"/>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="assignSuccess" sourceRef="judgeAssign" targetRef="dispatcher" name="自动分配成功">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <userTask id="assignDispatcher" name="分配调度员"/>
+    <sequenceFlow id="assignFailed" sourceRef="judgeAssign" targetRef="assignDispatcher" name="手动分配或自动分配失败">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <exclusiveGateway id="judgeJointDispatch" name="是否需要联合调度"/>
+    <sequenceFlow id="judgeJointDispatchFlow" sourceRef="dispatcher" targetRef="judgeJointDispatch"/>
+    <userTask id="highJointDispatcher" name="高级调度员"/>
+    <sequenceFlow id="jointDispatch" sourceRef="judgeJointDispatch" targetRef="highJointDispatcher" name="需要联合调度">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <exclusiveGateway id="approveJointDispatch" name="审核是否需要联合调度"/>
+    <sequenceFlow id="approveJointDispatchFlow" sourceRef="highJointDispatcher" targetRef="approveJointDispatch"/>
+    <sequenceFlow id="passJointDispatch" sourceRef="approveJointDispatch" targetRef="assignDispatcher" name="同意联合调度">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <userTask id="forceDispatch" name="力量调度"/>
+    <sequenceFlow id="noJointDispatch" sourceRef="judgeJointDispatch" targetRef="forceDispatch" name="不需要联合调度">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <sequenceFlow id="manualAssign" sourceRef="assignDispatcher" targetRef="dispatcher" name="手动分配调度员"/>
+    <sequenceFlow id="notPassJointDispatch" sourceRef="approveJointDispatch" targetRef="forceDispatch" name="拒绝联合调度">
+      <conditionExpression xsi:type="tFormalExpression"/>
+    </sequenceFlow>
+    <endEvent id="end" name="结束"/>
+    <sequenceFlow id="endFlow" sourceRef="forceDispatch" targetRef="end"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Expense">
+    <bpmndi:BPMNPlane bpmnElement="Dispatch" id="BPMNPlane_Expense">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="30.0" width="30.0" x="285.0" y="135.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="assignTask" id="BPMNShape_fillTask">
+        <omgdc:Bounds height="80.0" width="100.0" x="385.0" y="110.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="startFlow" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="315.0" y="150.0"/>
+        <omgdi:waypoint x="385.0" y="150.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-e07175c5-441d-4930-a93c-613e4881110a" bpmnElement="judgeAssign">
+        <omgdc:Bounds x="600.0" y="130.0" width="40.0" height="40.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-913bf63c-221e-4f2c-93e3-26ec909f3440" bpmnElement="assignFlow">
+        <omgdi:waypoint x="485.0" y="150.0"/>
+        <omgdi:waypoint x="600.0" y="150.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-d15c2ba3-7438-4b68-9521-1497d874cd54" bpmnElement="dispatcher">
+        <omgdc:Bounds x="660.0" y="10.000004" width="100.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-0fd893d7-ebd3-4352-84a4-400e39719413" bpmnElement="assignSuccess">
+        <omgdi:waypoint x="619.99994" y="130.0"/>
+        <omgdi:waypoint x="617.5" y="62.5"/>
+        <omgdi:waypoint x="617.50006" y="50.0"/>
+        <omgdi:waypoint x="640.0" y="50.0"/>
+        <omgdi:waypoint x="660.0" y="50.000004"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-a7f0d0ee-4624-4729-b0fe-63985d13f426" bpmnElement="assignDispatcher">
+        <omgdc:Bounds x="665.0" y="230.0" width="100.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-8ed7372a-4717-4b6d-a18d-0d1a2962fb1f" bpmnElement="assignFailed">
+        <omgdi:waypoint x="620.0" y="170.0"/>
+        <omgdi:waypoint x="620.0" y="270.0"/>
+        <omgdi:waypoint x="664.99994" y="270.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-5e8b1e1b-32d5-401a-83f4-5698f7b3b436" bpmnElement="judgeJointDispatch">
+        <omgdc:Bounds x="890.0" y="30.000004" width="40.0" height="40.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-35d70909-f3fd-429e-80cb-aa11d2687acd" bpmnElement="judgeJointDispatchFlow">
+        <omgdi:waypoint x="760.0" y="50.000004"/>
+        <omgdi:waypoint x="890.0" y="50.000004"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-64896735-8dab-4c26-be9b-69f94d04682c" bpmnElement="highJointDispatcher">
+        <omgdc:Bounds x="860.0" y="140.0" width="100.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-96186b77-4a18-4af7-aa19-52c58b5c288a" bpmnElement="jointDispatch">
+        <omgdi:waypoint x="910.0" y="70.0"/>
+        <omgdi:waypoint x="910.0" y="140.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-46e93eb8-2a8b-4031-b0f9-4277c0dbe61d" bpmnElement="approveJointDispatch">
+        <omgdc:Bounds x="900.0" y="265.0" width="40.0" height="40.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-be532c91-3c39-47d3-a6a6-98316c1e0fb8" bpmnElement="approveJointDispatchFlow">
+        <omgdi:waypoint x="910.0" y="220.0"/>
+        <omgdi:waypoint x="920.0" y="265.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge-893180a9-82d3-4c9a-a3d5-fa6a1b235a6d" bpmnElement="passJointDispatch">
+        <omgdi:waypoint x="900.0" y="285.0"/>
+        <omgdi:waypoint x="765.0" y="290.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-2d39bc88-662c-48c8-bd38-530961939102" bpmnElement="forceDispatch">
+        <omgdc:Bounds x="1065.0" y="10.0" width="100.0" height="80.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-5f27fa59-afa9-41f6-ae61-403ccc624435" bpmnElement="noJointDispatch">
+        <omgdi:waypoint x="930.0" y="50.000004"/>
+        <omgdi:waypoint x="1065.0" y="50.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge-c86fb17e-f33c-4e6c-a8e6-f0651ff12ad8" bpmnElement="manualAssign">
+        <omgdi:waypoint x="715.0" y="230.0"/>
+        <omgdi:waypoint x="710.0" y="90.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge-1729b37a-77ec-482c-ab8f-d637969ad67a" bpmnElement="notPassJointDispatch">
+        <omgdi:waypoint x="940.0" y="285.0"/>
+        <omgdi:waypoint x="1015.0" y="285.0"/>
+        <omgdi:waypoint x="1090.0" y="284.99997"/>
+        <omgdi:waypoint x="1090.0" y="90.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-ec098bf5-7a05-4750-bbae-73c608e63e42" bpmnElement="end">
+        <omgdc:Bounds x="1330.0" y="50.0" width="30.0" height="30.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-2334ee77-0242-4167-9815-7d3f836b09ec" bpmnElement="endFlow">
+        <omgdi:waypoint x="1165.0" y="50.0"/>
+        <omgdi:waypoint x="1330.0" y="57.5"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

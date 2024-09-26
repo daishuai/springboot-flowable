@@ -54,6 +54,8 @@ public class ExpenseController {
         HashMap<String, Object> map = new HashMap<>();
         map.put("taskUser", userId);
         map.put("money", money);
+        map.put("director", 456);
+        map.put("boss", 789);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Expense", map);
         return "提交成功.流程Id为：" + processInstance.getId();
     }
