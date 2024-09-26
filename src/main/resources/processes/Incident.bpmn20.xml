@@ -12,17 +12,17 @@
         <flowable:field name="autoAssign"/>
       </extensionElements>
     </serviceTask>
-    <userTask id="dispatcher" name="调度员">
+    <userTask id="dispatcher" name="调度员" flowable:candidateUsers="${dispatchers}">
       <extensionElements>
         <flowable:formProperty id="incidentCode"/>
       </extensionElements>
     </userTask>
     <sequenceFlow id="assignSuccess" sourceRef="judgeAssign" targetRef="dispatcher" name="自动分配成功">
-      <conditionExpression xsi:type="tFormalExpression"/>
+      <conditionExpression xsi:type="tFormalExpression">${assignResult == 'success'}</conditionExpression>
     </sequenceFlow>
     <userTask id="assignDispatcher" name="分配调度员"/>
     <sequenceFlow id="assignFailed" sourceRef="judgeAssign" targetRef="assignDispatcher" name="手动分配或自动分配失败">
-      <conditionExpression xsi:type="tFormalExpression"/>
+      <conditionExpression xsi:type="tFormalExpression">${assignResult == 'failed'}</conditionExpression>
     </sequenceFlow>
     <exclusiveGateway id="judgeJointDispatch" name="是否需要联合调度"/>
     <sequenceFlow id="judgeJointDispatchFlow" sourceRef="dispatcher" targetRef="judgeJointDispatch"/>
@@ -70,7 +70,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-0fd893d7-ebd3-4352-84a4-400e39719413" bpmnElement="assignSuccess">
         <omgdi:waypoint x="619.99994" y="130.0"/>
-        <omgdi:waypoint x="617.5" y="62.5"/>
         <omgdi:waypoint x="617.50006" y="50.0"/>
         <omgdi:waypoint x="640.0" y="50.0"/>
         <omgdi:waypoint x="660.0" y="50.000004"/>
