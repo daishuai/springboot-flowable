@@ -12,10 +12,11 @@
         <flowable:field name="autoAssign"/>
       </extensionElements>
     </serviceTask>
-    <userTask id="dispatcher" name="调度员" flowable:candidateUsers="${dispatchers}">
+    <userTask id="dispatcher" name="调度员" flowable:assignee="${user}">
       <extensionElements>
         <flowable:formProperty id="incidentCode"/>
       </extensionElements>
+      <multiInstanceLoopCharacteristics flowable:collection="${dispatchers}" flowable:elementVariable="user"/>
     </userTask>
     <sequenceFlow id="assignSuccess" sourceRef="judgeAssign" targetRef="dispatcher" name="自动分配成功">
       <conditionExpression xsi:type="tFormalExpression">${assignResult == 'success'}</conditionExpression>
@@ -28,16 +29,15 @@
     <sequenceFlow id="judgeJointDispatchFlow" sourceRef="dispatcher" targetRef="judgeJointDispatch"/>
     <userTask id="highJointDispatcher" name="高级调度员"/>
     <sequenceFlow id="jointDispatch" sourceRef="judgeJointDispatch" targetRef="highJointDispatcher" name="需要联合调度">
-      <conditionExpression xsi:type="tFormalExpression"/>
+      <conditionExpression xsi:type="tFormalExpression">${jointDispatch}</conditionExpression>
     </sequenceFlow>
     <exclusiveGateway id="approveJointDispatch" name="审核是否需要联合调度"/>
     <sequenceFlow id="approveJointDispatchFlow" sourceRef="highJointDispatcher" targetRef="approveJointDispatch"/>
     <sequenceFlow id="passJointDispatch" sourceRef="approveJointDispatch" targetRef="assignDispatcher" name="同意联合调度">
       <conditionExpression xsi:type="tFormalExpression"/>
     </sequenceFlow>
-    <userTask id="forceDispatch" name="力量调度"/>
     <sequenceFlow id="noJointDispatch" sourceRef="judgeJointDispatch" targetRef="forceDispatch" name="不需要联合调度">
-      <conditionExpression xsi:type="tFormalExpression"/>
+      <conditionExpression xsi:type="tFormalExpression">${!jointDispatch}</conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="manualAssign" sourceRef="assignDispatcher" targetRef="dispatcher" name="手动分配调度员"/>
     <sequenceFlow id="notPassJointDispatch" sourceRef="approveJointDispatch" targetRef="forceDispatch" name="拒绝联合调度">
@@ -45,6 +45,7 @@
     </sequenceFlow>
     <endEvent id="end" name="结束"/>
     <sequenceFlow id="endFlow" sourceRef="forceDispatch" targetRef="end"/>
+    <userTask id="forceDispatch" name="力量调度"/>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Expense">
     <bpmndi:BPMNPlane bpmnElement="Dispatch" id="BPMNPlane_Expense">
